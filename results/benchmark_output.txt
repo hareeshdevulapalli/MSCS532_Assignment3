@@ -1,0 +1,117 @@
+Python 3.13.9
+
+Part 1: Quicksort
+    random  Randomized Quicksort     n=  1000       0.71 ms       10,714 comparisons
+    random  Randomized Quicksort     n=  2000       1.72 ms       24,609 comparisons
+    random  Randomized Quicksort     n=  4000       3.48 ms       55,669 comparisons
+    random  Randomized Quicksort     n=  8000       7.85 ms      122,807 comparisons
+    random  Randomized Quicksort     n= 16000      16.45 ms      270,954 comparisons
+    random  Randomized Quicksort     n= 32000      34.50 ms      563,977 comparisons
+    random  Randomized Quicksort     n= 64000      75.30 ms    1,241,900 comparisons
+    random  Deterministic Quicksort  n=  1000       0.60 ms       11,316 comparisons
+    random  Deterministic Quicksort  n=  2000       1.28 ms       23,214 comparisons
+    random  Deterministic Quicksort  n=  4000       2.97 ms       54,737 comparisons
+    random  Deterministic Quicksort  n=  8000       6.70 ms      126,305 comparisons
+    random  Deterministic Quicksort  n= 16000      13.77 ms      249,513 comparisons
+    random  Deterministic Quicksort  n= 32000      29.13 ms      546,894 comparisons
+    random  Deterministic Quicksort  n= 64000      68.95 ms    1,243,254 comparisons
+    random  Randomized (Lomuto)      n=  1000       0.57 ms       11,416 comparisons
+    random  Randomized (Lomuto)      n=  2000       1.26 ms       24,990 comparisons
+    random  Randomized (Lomuto)      n=  4000       2.67 ms       55,868 comparisons
+    random  Randomized (Lomuto)      n=  8000       5.54 ms      128,768 comparisons
+    random  Randomized (Lomuto)      n= 16000      11.88 ms      273,147 comparisons
+    random  Randomized (Lomuto)      n= 32000      25.43 ms      550,438 comparisons
+    random  Randomized (Lomuto)      n= 64000      52.49 ms    1,227,425 comparisons
+    sorted  Randomized Quicksort     n=  1000       0.70 ms       11,232 comparisons
+    sorted  Randomized Quicksort     n=  2000       1.53 ms       23,679 comparisons
+    sorted  Randomized Quicksort     n=  4000       3.48 ms       52,357 comparisons
+    sorted  Randomized Quicksort     n=  8000       7.28 ms      126,845 comparisons
+    sorted  Randomized Quicksort     n= 16000      15.48 ms      262,585 comparisons
+    sorted  Randomized Quicksort     n= 32000      33.85 ms      572,773 comparisons
+    sorted  Randomized Quicksort     n= 64000      70.99 ms    1,250,937 comparisons
+    sorted  Deterministic Quicksort  n=  1000      11.84 ms      499,500 comparisons
+    sorted  Deterministic Quicksort  n=  2000      45.69 ms    1,999,000 comparisons
+    sorted  Deterministic Quicksort  n=  4000     181.30 ms    7,998,000 comparisons
+    sorted  Deterministic Quicksort  n=  8000     715.03 ms   31,996,000 comparisons
+    sorted  Deterministic Quicksort  n= 16000    2865.68 ms  127,992,000 comparisons
+    sorted  Randomized (Lomuto)      n=  1000       0.53 ms       10,408 comparisons
+    sorted  Randomized (Lomuto)      n=  2000       1.17 ms       25,598 comparisons
+    sorted  Randomized (Lomuto)      n=  4000       2.50 ms       60,025 comparisons
+    sorted  Randomized (Lomuto)      n=  8000       5.16 ms      124,054 comparisons
+    sorted  Randomized (Lomuto)      n= 16000      10.91 ms      255,165 comparisons
+    sorted  Randomized (Lomuto)      n= 32000      23.19 ms      599,876 comparisons
+    sorted  Randomized (Lomuto)      n= 64000      48.40 ms    1,258,566 comparisons
+   reverse  Randomized Quicksort     n=  1000       0.75 ms       11,240 comparisons
+   reverse  Randomized Quicksort     n=  2000       1.69 ms       24,578 comparisons
+   reverse  Randomized Quicksort     n=  4000       3.55 ms       53,831 comparisons
+   reverse  Randomized Quicksort     n=  8000       7.38 ms      120,351 comparisons
+   reverse  Randomized Quicksort     n= 16000      16.10 ms      266,256 comparisons
+   reverse  Randomized Quicksort     n= 32000      33.63 ms      600,453 comparisons
+   reverse  Randomized Quicksort     n= 64000      72.79 ms    1,329,812 comparisons
+   reverse  Deterministic Quicksort  n=  1000      25.87 ms      499,500 comparisons
+   reverse  Deterministic Quicksort  n=  2000     108.16 ms    1,999,000 comparisons
+   reverse  Deterministic Quicksort  n=  4000     448.70 ms    7,998,000 comparisons
+   reverse  Deterministic Quicksort  n=  8000    1967.22 ms   31,996,000 comparisons
+   reverse  Randomized (Lomuto)      n=  1000       0.56 ms       11,228 comparisons
+   reverse  Randomized (Lomuto)      n=  2000       1.16 ms       24,756 comparisons
+   reverse  Randomized (Lomuto)      n=  4000       2.57 ms       51,872 comparisons
+   reverse  Randomized (Lomuto)      n=  8000       5.09 ms      127,806 comparisons
+   reverse  Randomized (Lomuto)      n= 16000      11.13 ms      260,809 comparisons
+   reverse  Randomized (Lomuto)      n= 32000      22.86 ms      587,116 comparisons
+   reverse  Randomized (Lomuto)      n= 64000      48.01 ms    1,271,591 comparisons
+  repeated  Randomized Quicksort     n=  1000       0.16 ms        3,072 comparisons
+  repeated  Randomized Quicksort     n=  2000       0.30 ms        6,319 comparisons
+  repeated  Randomized Quicksort     n=  4000       0.61 ms       11,992 comparisons
+  repeated  Randomized Quicksort     n=  8000       1.30 ms       31,144 comparisons
+  repeated  Randomized Quicksort     n= 16000       2.39 ms       62,152 comparisons
+  repeated  Randomized Quicksort     n= 32000       5.00 ms      102,269 comparisons
+  repeated  Randomized Quicksort     n= 64000      11.27 ms      204,852 comparisons
+  repeated  Deterministic Quicksort  n=  1000       0.14 ms        3,042 comparisons
+  repeated  Deterministic Quicksort  n=  2000       0.31 ms        6,582 comparisons
+  repeated  Deterministic Quicksort  n=  4000       0.63 ms       12,352 comparisons
+  repeated  Deterministic Quicksort  n=  8000       1.33 ms       29,432 comparisons
+  repeated  Deterministic Quicksort  n= 16000       2.53 ms       51,243 comparisons
+  repeated  Deterministic Quicksort  n= 32000       5.67 ms      105,953 comparisons
+  repeated  Deterministic Quicksort  n= 64000      10.00 ms      256,257 comparisons
+  repeated  Randomized (Lomuto)      n=  1000       2.12 ms       54,554 comparisons
+  repeated  Randomized (Lomuto)      n=  2000       7.66 ms      208,936 comparisons
+  repeated  Randomized (Lomuto)      n=  4000      27.85 ms      811,879 comparisons
+  repeated  Randomized (Lomuto)      n=  8000     105.58 ms    3,242,573 comparisons
+  repeated  Randomized (Lomuto)      n= 16000     410.54 ms   12,859,716 comparisons
+  repeated  Randomized (Lomuto)      n= 32000    1613.98 ms   51,350,561 comparisons
+
+Part 2a: hash table, growing load factor (no resizing)
+  alpha= 0.25  insert 0.365 us  hit 0.208 us  miss 0.192 us  delete 0.289 us  examined hit 1.11 (theory 1.12)  max chain 3
+  alpha=  0.5  insert 0.323 us  hit 0.218 us  miss 0.204 us  delete 0.292 us  examined hit 1.25 (theory 1.25)  max chain 5
+  alpha=    1  insert 0.287 us  hit 0.221 us  miss 0.212 us  delete 0.299 us  examined hit 1.48 (theory 1.50)  max chain 7
+  alpha=    2  insert 0.297 us  hit 0.236 us  miss 0.239 us  delete 0.312 us  examined hit 2.00 (theory 2.00)  max chain 9
+  alpha=    4  insert 0.317 us  hit 0.261 us  miss 0.287 us  delete 0.344 us  examined hit 3.01 (theory 3.00)  max chain 12
+  alpha=    8  insert 0.365 us  hit 0.297 us  miss 0.355 us  delete 0.360 us  examined hit 5.03 (theory 5.00)  max chain 21
+  alpha=   16  insert 0.425 us  hit 0.385 us  miss 0.510 us  delete 0.395 us  examined hit 8.99 (theory 9.00)  max chain 30
+
+Part 2b: hash table, growing n
+  resizing  n=   1024  m=   1024  alpha=    1.0  insert 0.571 us  search 0.228 us
+     fixed  n=   1024  m=   1024  alpha=    1.0  insert 0.277 us  search 0.237 us
+  resizing  n=   2048  m=   2048  alpha=    1.0  insert 0.578 us  search 0.231 us
+     fixed  n=   2048  m=   1024  alpha=    2.0  insert 0.300 us  search 0.241 us
+  resizing  n=   4096  m=   4096  alpha=    1.0  insert 0.620 us  search 0.233 us
+     fixed  n=   4096  m=   1024  alpha=    4.0  insert 0.312 us  search 0.262 us
+  resizing  n=   8192  m=   8192  alpha=    1.0  insert 0.657 us  search 0.233 us
+     fixed  n=   8192  m=   1024  alpha=    8.0  insert 0.338 us  search 0.301 us
+  resizing  n=  16384  m=  16384  alpha=    1.0  insert 0.708 us  search 0.245 us
+     fixed  n=  16384  m=   1024  alpha=   16.0  insert 0.397 us  search 0.357 us
+  resizing  n=  32768  m=  32768  alpha=    1.0  insert 0.719 us  search 0.260 us
+     fixed  n=  32768  m=   1024  alpha=   32.0  insert 0.575 us  search 0.526 us
+  resizing  n=  65536  m=  65536  alpha=    1.0  insert 0.897 us  search 0.282 us
+     fixed  n=  65536  m=   1024  alpha=   64.0  insert 0.898 us  search 0.808 us
+  resizing  n= 131072  m= 131072  alpha=    1.0  insert 1.230 us  search 0.375 us
+     fixed  n= 131072  m=   1024  alpha=  128.0  insert 1.679 us  search 1.542 us
+  resizing  n= 262144  m= 262144  alpha=    1.0  insert 1.760 us  search 0.470 us
+  resizing  n= 524288  m= 524288  alpha=    1.0  insert 2.207 us  search 0.552 us
+
+Part 2c: chain lengths at alpha = 1
+  universal, random keys   empty slots  3713  max chain    7  avg items examined (hit)    1.51
+  universal, keys = 64i    empty slots  2771  max chain    2  avg items examined (hit)    1.28
+  k mod m, keys = 64i      empty slots  9375  max chain   16  avg items examined (hit)    8.50
+
+CSV files and graphs written to /Users/hareeshdevulapalli/Projects/UC/Sem4/Algorithms and DS/MSCS532_Assignment3/results
