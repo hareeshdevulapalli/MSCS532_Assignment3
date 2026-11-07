@@ -1,4 +1,7 @@
-"""Unit tests for quicksort.py and hash_table.py."""
+"""Unit tests for quicksort.py and hash_table.py.
+
+Run with:  python3 -m unittest -v test_assignment3
+"""
 
 import random
 import unittest
@@ -7,156 +10,155 @@ from hash_table import HashTable
 from quicksort import deterministic_quicksort, randomized_quicksort
 
 
-def randomized_lomuto(arr):
-    return randomized_quicksort(arr, three_way=False)
+def lomuto_quicksort(nums):
+    return randomized_quicksort(nums, three_way=False)
 
 
-SORTS = [randomized_quicksort, deterministic_quicksort, randomized_lomuto]
+ALL_SORTS = [randomized_quicksort, deterministic_quicksort, lomuto_quicksort]
 
 
-class QuicksortTests(unittest.TestCase):
-    def check(self, data):
-        for sort in SORTS:
-            with self.subTest(sort=sort.__name__, data=data[:10]):
-                copy = list(data)
-                result = sort(copy)
-                self.assertIs(result, copy)  # sorted in place
-                self.assertEqual(copy, sorted(data))
+class TestQuicksort(unittest.TestCase):
+    def assert_sorts(self, values):
+        for sort_fn in ALL_SORTS:
+            with self.subTest(sort=sort_fn.__name__, values=values[:10]):
+                lst = list(values)
+                out = sort_fn(lst)
+                self.assertIs(out, lst)          # should sort in place
+                self.assertEqual(lst, sorted(values))
 
-    def test_empty_and_single(self):
-        self.check([])
-        self.check([7])
+    def test_empty_and_one_item(self):
+        self.assert_sorts([])
+        self.assert_sorts([7])
 
     def test_two_items(self):
-        self.check([2, 1])
-        self.check([1, 2])
-        self.check([1, 1])
+        self.assert_sorts([2, 1])
+        self.assert_sorts([1, 2])
+        self.assert_sorts([1, 1])
 
-    def test_sorted_and_reverse(self):
-        self.check(list(range(1000)))
-        self.check(list(range(1000, 0, -1)))
+    def test_already_sorted_and_reversed(self):
+        self.assert_sorts(list(range(1000)))
+        self.assert_sorts(list(range(1000, 0, -1)))
 
-    def test_repeated_elements(self):
-        self.check([4] * 500)
-        self.check([3, 1, 3, 3, 2, 1, 3, 2, 2, 1])
-        rng = random.Random(1)
-        self.check([rng.randint(0, 4) for _ in range(2000)])
+    def test_duplicates(self):
+        self.assert_sorts([4] * 500)
+        self.assert_sorts([3, 1, 3, 3, 2, 1, 3, 2, 2, 1])
+        gen = random.Random(1)
+        self.assert_sorts([gen.randint(0, 4) for _ in range(2000)])
 
-    def test_negatives_floats_strings(self):
-        self.check([3, -2, 0.5, -7.25, 10, 0, -2])
-        self.check(["pear", "apple", "fig", "apple", "kiwi"])
+    def test_negatives_floats_and_strings(self):
+        self.assert_sorts([3, -2, 0.5, -7.25, 10, 0, -2])
+        self.assert_sorts(["pear", "apple", "fig", "apple", "kiwi"])
 
-    def test_random(self):
-        rng = random.Random(532)
+    def test_random_lists(self):
+        gen = random.Random(532)
         for size in (3, 10, 100, 1001, 5000):
-            self.check([rng.randint(-10**6, 10**6) for _ in range(size)])
+            self.assert_sorts([gen.randint(-10**6, 10**6) for _ in range(size)])
 
-    def test_large_sorted_input_does_not_overflow_stack(self):
-        # Deterministic Quicksort is Theta(n^2) here, but the smaller-side
-        # recursion keeps the stack shallow, so this must not raise
-        # RecursionError.
-        data = list(range(3000))
-        self.assertEqual(deterministic_quicksort(list(data)), data)
+    def test_big_sorted_list_no_recursion_error(self):
+        # first-item pivot is n^2 here, but since we only recurse on the
+        # smaller side the stack stays shallow and this shouldn't crash
+        values = list(range(3000))
+        self.assertEqual(deterministic_quicksort(list(values)), values)
 
-    def test_comparison_counts(self):
+    def test_comparison_counter(self):
         n = 400
-        stats = {"comparisons": 0}
-        deterministic_quicksort(list(range(n)), stats=stats)
-        self.assertEqual(stats["comparisons"], n * (n - 1) // 2)  # worst case
+        counts = {"comparisons": 0}
+        deterministic_quicksort(list(range(n)), stats=counts)
+        self.assertEqual(counts["comparisons"], n * (n - 1) // 2)  # worst case
 
-        stats = {"comparisons": 0}
-        randomized_quicksort([5] * n, stats=stats)
-        self.assertEqual(stats["comparisons"], n - 1)  # one three-way pass
+        counts = {"comparisons": 0}
+        randomized_quicksort([5] * n, stats=counts)
+        self.assertEqual(counts["comparisons"], n - 1)  # done in one pass
 
 
-class HashTableTests(unittest.TestCase):
-    def test_insert_search_delete(self):
-        table = HashTable()
-        table.insert("a", 1)
-        table.insert("b", 2)
-        self.assertEqual(table.search("a"), 1)
-        self.assertEqual(table.search("b"), 2)
-        self.assertIsNone(table.search("c"))
-        self.assertEqual(table.search("c", "missing"), "missing")
-        self.assertEqual(table.delete("a"), 1)
-        self.assertIsNone(table.search("a"))
-        self.assertEqual(len(table), 1)
+class TestHashTable(unittest.TestCase):
+    def test_basic_insert_search_delete(self):
+        ht = HashTable()
+        ht.insert("a", 1)
+        ht.insert("b", 2)
+        self.assertEqual(ht.search("a"), 1)
+        self.assertEqual(ht.search("b"), 2)
+        self.assertIsNone(ht.search("c"))
+        self.assertEqual(ht.search("c", "missing"), "missing")
+        self.assertEqual(ht.delete("a"), 1)
+        self.assertIsNone(ht.search("a"))
+        self.assertEqual(len(ht), 1)
 
-    def test_insert_existing_key_updates_value(self):
-        table = HashTable()
-        table.insert(42, "old")
-        table.insert(42, "new")
-        self.assertEqual(table.search(42), "new")
-        self.assertEqual(len(table), 1)
+    def test_insert_same_key_updates(self):
+        ht = HashTable()
+        ht.insert(42, "old")
+        ht.insert(42, "new")
+        self.assertEqual(ht.search(42), "new")
+        self.assertEqual(len(ht), 1)
 
-    def test_delete_missing_key_raises(self):
-        table = HashTable()
+    def test_delete_missing_key(self):
+        ht = HashTable()
         with self.assertRaises(KeyError):
-            table.delete("nope")
-        table.insert(1, 1)
-        table.delete(1)
+            ht.delete("nope")
+        ht.insert(1, 1)
+        ht.delete(1)
         with self.assertRaises(KeyError):
-            table.delete(1)
+            ht.delete(1)
 
-    def test_none_value_and_mixed_keys(self):
-        table = HashTable()
-        table[None] = "none key"
-        table[(1, 2)] = None
-        table[-5] = "negative"
-        table[3.5] = "float"
-        self.assertEqual(table[None], "none key")
-        self.assertIn((1, 2), table)
-        self.assertIsNone(table[(1, 2)])
-        self.assertEqual(table[-5], "negative")
-        self.assertEqual(table[3.5], "float")
+    def test_odd_keys_and_none_values(self):
+        ht = HashTable()
+        ht[None] = "none key"
+        ht[(1, 2)] = None
+        ht[-5] = "negative"
+        ht[3.5] = "float"
+        self.assertEqual(ht[None], "none key")
+        self.assertIn((1, 2), ht)
+        self.assertIsNone(ht[(1, 2)])
+        self.assertEqual(ht[-5], "negative")
+        self.assertEqual(ht[3.5], "float")
         with self.assertRaises(KeyError):
-            _ = table["absent"]
+            _ = ht["absent"]
 
-    def test_matches_dict_under_random_operations(self):
-        rng = random.Random(7)
-        table, reference = HashTable(rng=random.Random(8)), {}
+    def test_same_as_dict_after_random_ops(self):
+        gen = random.Random(7)
+        ht, expected = HashTable(rng=random.Random(8)), {}
         for _ in range(20000):
-            key = rng.randint(-500, 500)
-            op = rng.random()
-            if op < 0.5:
-                table[key] = reference[key] = rng.random()
-            elif op < 0.8:
-                self.assertEqual(table.search(key), reference.get(key))
-            elif key in reference:
-                self.assertEqual(table.delete(key), reference.pop(key))
+            key = gen.randint(-500, 500)
+            roll = gen.random()
+            if roll < 0.5:
+                ht[key] = expected[key] = gen.random()
+            elif roll < 0.8:
+                self.assertEqual(ht.search(key), expected.get(key))
+            elif key in expected:
+                self.assertEqual(ht.delete(key), expected.pop(key))
             else:
                 with self.assertRaises(KeyError):
-                    table.delete(key)
-            self.assertEqual(len(table), len(reference))
-        self.assertEqual(dict(table.items()), reference)
+                    ht.delete(key)
+            self.assertEqual(len(ht), len(expected))
+        self.assertEqual(dict(ht.items()), expected)
 
-    def test_resizing_keeps_load_factor_bounded(self):
-        table = HashTable()
+    def test_resize_keeps_load_factor_in_range(self):
+        ht = HashTable()
         for i in range(10000):
-            table.insert(i, i)
-            self.assertLessEqual(table.load_factor, HashTable.MAX_LOAD)
-        self.assertEqual(sum(table.chain_lengths()), 10000)
+            ht.insert(i, i)
+            self.assertLessEqual(ht.load_factor, HashTable.MAX_LOAD)
+        self.assertEqual(sum(ht.bucket_sizes()), 10000)
         for i in range(9990):
-            table.delete(i)
-        self.assertGreaterEqual(table.load_factor, HashTable.MIN_LOAD)
-        self.assertEqual(sorted(k for k, _ in table.items()), list(range(9990, 10000)))
+            ht.delete(i)
+        self.assertGreaterEqual(ht.load_factor, HashTable.MIN_LOAD)
+        self.assertEqual(sorted(k for k, _ in ht.items()), list(range(9990, 10000)))
 
-    def test_fixed_size_table_does_not_resize(self):
-        table = HashTable(capacity=16, resize=False)
+    def test_no_resize_when_turned_off(self):
+        ht = HashTable(capacity=16, resize=False)
         for i in range(160):
-            table.insert(i, i)
-        self.assertEqual(table.num_slots, 16)
-        self.assertAlmostEqual(table.load_factor, 10.0)
-        self.assertTrue(all(table.search(i) == i for i in range(160)))
+            ht.insert(i, i)
+        self.assertEqual(ht.num_buckets, 16)
+        self.assertAlmostEqual(ht.load_factor, 10.0)
+        self.assertTrue(all(ht.search(i) == i for i in range(160)))
 
-    def test_universal_hash_spreads_adversarial_keys(self):
-        # Keys that are all multiples of m would all land in slot 0 under
-        # h(k) = k mod m. The universal function should still spread them.
+    def test_universal_hash_with_bad_keys(self):
+        # with h(k) = k mod m these keys would all go to bucket 0,
+        # the universal hash should still spread them out
         m = 1024
-        table = HashTable(capacity=m, resize=False, rng=random.Random(3))
+        ht = HashTable(capacity=m, resize=False, rng=random.Random(3))
         for i in range(m):
-            table.insert(i * m, i)
-        self.assertLess(max(table.chain_lengths()), 10)
+            ht.insert(i * m, i)
+        self.assertLess(max(ht.bucket_sizes()), 10)
 
 
 if __name__ == "__main__":

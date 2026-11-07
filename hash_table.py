@@ -1,135 +1,135 @@
-"""Hash table with chaining and a universal hash function.
+"""Hash table with chaining for MSCS 532 Assignment 3.
 
-Each slot of the table holds a chain: a Python list of [key, value] pairs.
-Keys are mapped to slots with a function drawn at random from the
-Carter-Wegman universal family (Cormen et al., 4th ed., Section 11.3.4)
+Every bucket is a plain Python list of [key, value] entries. To pick the
+bucket for a key I use the Carter-Wegman universal hash family (CLRS 4th ed.
+sec 11.3):
 
-    h_ab(k) = ((a * k + b) mod p) mod m,
+    h(k) = ((a*k + b) mod p) mod m
 
-where p = 2^61 - 1 is a prime larger than any key we hash, 1 <= a < p and
-0 <= b < p are chosen at random, and m is the number of slots. For any two
-distinct keys the probability (over the choice of a and b) that they collide
-is at most 1/m, whatever the keys are.
+p = 2^61 - 1 is a prime bigger than any key I'll hash, a and b are random
+(1 <= a < p, 0 <= b < p) and m is the number of buckets. For any two
+different keys the chance they land in the same bucket is at most 1/m, and
+that holds for any set of keys, not just random ones.
 
-The table keeps its load factor alpha = n / m between MIN_LOAD and MAX_LOAD
-by doubling or halving m. A resize draws a fresh hash function and rehashes
-every item, which costs Theta(n), but resizes happen rarely enough that
-insert and delete still take O(1) amortized expected time.
+The table resizes itself to keep the load factor (n/m) between MIN_LOAD and
+MAX_LOAD: it doubles when it gets too full and halves when it gets too empty.
+Each resize picks new a and b and re-inserts everything. That's O(n) for the
+resize, but it happens rarely enough that insert/delete are still O(1)
+amortized.
 """
 
 import random
 
-_PRIME = (1 << 61) - 1  # Mersenne prime, larger than any 61-bit key
+MERSENNE_P = (1 << 61) - 1
 
 
 class HashTable:
-    """A dictionary-like map built on separate chaining."""
+    """Key -> value map using separate chaining."""
 
-    MAX_LOAD = 1.0   # grow when alpha would go above this
-    MIN_LOAD = 0.25  # shrink when alpha drops below this
-    MIN_SLOTS = 8
+    MAX_LOAD = 1.0    # double the buckets once n/m goes over this
+    MIN_LOAD = 0.25   # halve them once n/m drops under this
+    MIN_BUCKETS = 8
 
-    def __init__(self, capacity=MIN_SLOTS, resize=True, rng=None):
-        """Create an empty table with ``capacity`` slots.
+    def __init__(self, capacity=MIN_BUCKETS, resize=True, rng=None):
+        """Make an empty table with `capacity` buckets.
 
-        resize=False fixes the number of slots, which lets the benchmark
-        measure how a growing load factor slows the operations down.
+        With resize=False the bucket count never changes. I only use that in
+        the benchmark, to watch what happens as the load factor grows.
         """
-        self._rng = rng or random.Random()
-        self._resize_enabled = resize
-        self._size = 0
-        self._new_slots(max(1, capacity))
+        self._rand = rng or random.Random()
+        self._auto_resize = resize
+        self._count = 0
+        self._make_buckets(max(1, capacity))
 
-    # ----- hashing -----------------------------------------------------
+    # --- hashing helpers ---
 
-    def _new_slots(self, num_slots):
-        self._slots = [[] for _ in range(num_slots)]
-        self._a = self._rng.randrange(1, _PRIME)
-        self._b = self._rng.randrange(0, _PRIME)
+    def _make_buckets(self, how_many):
+        self._buckets = [[] for _ in range(how_many)]
+        self._mult = self._rand.randrange(1, MERSENNE_P)
+        self._shift = self._rand.randrange(0, MERSENNE_P)
 
     @staticmethod
-    def _to_int(key):
-        # Integers are hashed directly. Other hashable keys (strings, tuples,
-        # ...) are first turned into an integer with Python's built-in hash;
-        # the universal function then spreads those integers over the slots.
+    def _key_to_int(key):
+        # ints go in as-is. Anything else (strings, tuples...) goes through
+        # Python's hash() first, then the universal hash spreads it out.
         if isinstance(key, int):
-            return key % _PRIME
-        return hash(key) % _PRIME
+            return key % MERSENNE_P
+        return hash(key) % MERSENNE_P
 
-    def _index(self, key):
-        return ((self._a * self._to_int(key) + self._b) % _PRIME) % len(self._slots)
+    def _bucket_of(self, key):
+        k = self._key_to_int(key)
+        return ((self._mult * k + self._shift) % MERSENNE_P) % len(self._buckets)
 
-    def _resize(self, num_slots):
-        old_slots = self._slots
-        self._new_slots(num_slots)
-        for chain in old_slots:
-            for key, value in chain:
-                self._slots[self._index(key)].append([key, value])
+    def _rehash(self, new_size):
+        old = self._buckets
+        self._make_buckets(new_size)
+        for bucket in old:
+            for key, value in bucket:
+                self._buckets[self._bucket_of(key)].append([key, value])
 
-    # ----- the three dictionary operations ------------------------------
+    # --- the three main operations ---
 
     def insert(self, key, value):
-        """Add key -> value, or replace the value if key is already present.
+        """Store key -> value. If the key is already there, update its value.
 
-        Expected time O(1 + alpha) to scan the chain, O(1) amortized for the
-        occasional resize.
+        Expected O(1 + alpha) because we walk the bucket to check for the key,
+        plus O(1) amortized for resizing.
         """
-        chain = self._slots[self._index(key)]
-        for pair in chain:
-            if pair[0] == key:
-                pair[1] = value
+        bucket = self._buckets[self._bucket_of(key)]
+        for entry in bucket:
+            if entry[0] == key:
+                entry[1] = value
                 return
-        chain.append([key, value])
-        self._size += 1
-        if self._resize_enabled and self._size > self.MAX_LOAD * len(self._slots):
-            self._resize(2 * len(self._slots))
+        bucket.append([key, value])
+        self._count += 1
+        if self._auto_resize and self._count > self.MAX_LOAD * len(self._buckets):
+            self._rehash(2 * len(self._buckets))
 
     def search(self, key, default=None):
-        """Return the value stored under key, or ``default`` if it is absent.
+        """Return the value for key, or `default` if the key isn't stored.
 
-        Expected time Theta(1 + alpha) under simple uniform hashing.
+        Expected O(1 + alpha) with simple uniform hashing.
         """
-        for stored_key, value in self._slots[self._index(key)]:
-            if stored_key == key:
-                return value
+        for k, v in self._buckets[self._bucket_of(key)]:
+            if k == key:
+                return v
         return default
 
     def delete(self, key):
-        """Remove key and return its value. Raise KeyError if it is absent.
+        """Remove key and return its value. Raises KeyError if it's missing.
 
-        Expected time Theta(1 + alpha): finding the pair dominates, removing
-        it from a Python list is O(chain length) as well.
+        Expected O(1 + alpha), mostly from finding the key.
         """
-        chain = self._slots[self._index(key)]
-        for pos, (stored_key, value) in enumerate(chain):
-            if stored_key == key:
-                # Order inside a chain does not matter, so move the last pair
-                # into the hole instead of shifting everything after it.
-                chain[pos] = chain[-1]
-                chain.pop()
-                self._size -= 1
-                if (self._resize_enabled
-                        and len(self._slots) > self.MIN_SLOTS
-                        and self._size < self.MIN_LOAD * len(self._slots)):
-                    self._resize(max(self.MIN_SLOTS, len(self._slots) // 2))
-                return value
+        bucket = self._buckets[self._bucket_of(key)]
+        for i, (k, v) in enumerate(bucket):
+            if k == key:
+                # order inside a bucket doesn't matter, so just move the
+                # last entry into this spot instead of shifting the list
+                bucket[i] = bucket[-1]
+                bucket.pop()
+                self._count -= 1
+                too_empty = self._count < self.MIN_LOAD * len(self._buckets)
+                if (self._auto_resize and too_empty
+                        and len(self._buckets) > self.MIN_BUCKETS):
+                    self._rehash(max(self.MIN_BUCKETS, len(self._buckets) // 2))
+                return v
         raise KeyError(key)
 
-    # ----- convenience ---------------------------------------------------
+    # --- extras so it works like a dict ---
 
     def __len__(self):
-        return self._size
+        return self._count
 
     def __contains__(self, key):
-        sentinel = object()
-        return self.search(key, sentinel) is not sentinel
+        missing = object()
+        return self.search(key, missing) is not missing
 
     def __getitem__(self, key):
-        sentinel = object()
-        value = self.search(key, sentinel)
-        if value is sentinel:
+        missing = object()
+        found = self.search(key, missing)
+        if found is missing:
             raise KeyError(key)
-        return value
+        return found
 
     def __setitem__(self, key, value):
         self.insert(key, value)
@@ -138,36 +138,36 @@ class HashTable:
         self.delete(key)
 
     def items(self):
-        for chain in self._slots:
-            for key, value in chain:
+        for bucket in self._buckets:
+            for key, value in bucket:
                 yield key, value
 
     @property
-    def num_slots(self):
-        return len(self._slots)
+    def num_buckets(self):
+        return len(self._buckets)
 
     @property
     def load_factor(self):
-        return self._size / len(self._slots)
+        return self._count / len(self._buckets)
 
-    def chain_lengths(self):
-        return [len(chain) for chain in self._slots]
+    def bucket_sizes(self):
+        return [len(b) for b in self._buckets]
 
     def __repr__(self):
-        return (f"HashTable(n={self._size}, m={self.num_slots}, "
+        return (f"HashTable(n={self._count}, m={self.num_buckets}, "
                 f"alpha={self.load_factor:.2f})")
 
 
 if __name__ == "__main__":
-    table = HashTable()
-    for word, count in [("apple", 3), ("banana", 7), ("cherry", 1), ("date", 4)]:
-        table.insert(word, count)
-    print(table)
-    print("search('banana') ->", table.search("banana"))
-    table.insert("banana", 8)
-    print("after update, search('banana') ->", table.search("banana"))
-    print("delete('apple') ->", table.delete("apple"))
-    print("search('apple') ->", table.search("apple"))
-    for i in range(100):
-        table.insert(i, i * i)
-    print(table, "max chain:", max(table.chain_lengths()))
+    fruit = HashTable()
+    for name, qty in [("apple", 3), ("banana", 7), ("cherry", 1), ("date", 4)]:
+        fruit.insert(name, qty)
+    print(fruit)
+    print("search('banana') ->", fruit.search("banana"))
+    fruit.insert("banana", 8)
+    print("after update, search('banana') ->", fruit.search("banana"))
+    print("delete('apple') ->", fruit.delete("apple"))
+    print("search('apple') ->", fruit.search("apple"))
+    for num in range(100):
+        fruit.insert(num, num * num)
+    print(fruit, "longest bucket:", max(fruit.bucket_sizes()))

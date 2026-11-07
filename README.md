@@ -50,7 +50,7 @@ table.delete("apple")                 # returns 3; raises KeyError if missing
 
 ## Part 1: Randomized Quicksort
 
-**Implementation.** The pivot is picked with `random.randint(first, last)`.
+**Implementation.** The pivot is picked with `random.randint(lo, hi)`.
 The partition splits each subarray into `< pivot | == pivot | > pivot`, so all
 copies of a repeated value are handled in one pass. The code only recurses on
 the smaller side and loops on the bigger one, so the stack stays O(lg n) deep
